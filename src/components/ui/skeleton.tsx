@@ -1,7 +1,7 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
-type SkeletonProps = React.HTMLAttributes<HTMLDivElement>
+type SkeletonProps = React.HTMLAttributes<HTMLDivElement>;
 
 const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
   ({ className, ...props }, ref) => {
@@ -11,10 +11,10 @@ const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
         className={cn("animate-pulse rounded-md bg-muted", className)}
         {...props}
       />
-    )
+    );
   }
-)
+);
 
-Skeleton.displayName = "Skeleton"
+Skeleton.displayName = "Skeleton";
 
-export { Skeleton }
+export { Skeleton };
