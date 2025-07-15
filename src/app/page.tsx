@@ -10,10 +10,12 @@ export default function HomePage() {
   const [summary, setSummary] = useState("");
   const [translated, setTranslated] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSummarise = async () => {
     if (!url) return;
     setLoading(true);
+    setError("");
     try {
       const res = await fetch("/api/summarise", {
         method: "POST",
@@ -22,17 +24,23 @@ export default function HomePage() {
       });
 
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Something went wrong");
+      }
+
       setSummary(data.summary);
       setTranslated(data.urdu_summary);
-    } catch (error) {
-      console.error("Failed to summarise:", error);
+    } catch (err: any) {
+      console.error("Failed to summarise:", err.message);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="max-w-2xl mx-auto p-6 space-y-6">
+    <main className="max-w-2xl mx-auto p-6 space-y-6 min-h-screen bg-gradient-to-br from-white to-blue-100">
       <h1 className="text-3xl font-bold text-center">📝 Blog Summariser</h1>
 
       <Input
@@ -44,6 +52,8 @@ export default function HomePage() {
       <Button onClick={handleSummarise} disabled={loading} className="w-full">
         {loading ? "Summarising..." : "Summarise"}
       </Button>
+
+      {error && <p className="text-red-500 text-sm">{error}</p>}
 
       {summary && (
         <motion.div
