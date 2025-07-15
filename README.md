@@ -1,28 +1,46 @@
-# Nexium_Areesha_Assign2 - Blog Summariser 📝
+# Nexium_Areesha_Assign2 – Blog Summariser
 
-This is a [Next.js](https://nextjs.org) project created for Assignment 2: **Blog Summariser**.
+A web app that fetches a blog from a given URL, summarizes the content, translates it into Urdu using a dictionary, and stores:
 
-## 🌐 Live Preview
+- The **summary** in Supabase.
+- The **full blog text** in MongoDB.
 
-[Visit the deployed app on Vercel](https://your-vercel-link.vercel.app)
+---
 
-## 📌 Features
+## 🚀 Features
 
-- ✨ Blog URL input + content scraping
-- 🧠 Simulated AI summary (static logic)
-- 🌐 Urdu translation via JavaScript dictionary
-- 💾 Summary saved in **Supabase**, full blog saved in **MongoDB**
-- 🎨 Built with **ShadCN UI**, animated and colorful interface
-- 🖊️ Users can write, upload, and share blogs
+- Blog URL input and summary generation
+- Urdu translation via static dictionary
+- Summary saved in Supabase
+- Full blog saved in MongoDB
+- Built using Next.js 15 + ShadCN UI + Framer Motion
+- Deployed to Vercel
 
-## 🚀 Getting Started
+---
 
-First, clone the project and run the development server:
+## 📦 Technologies
 
-```bash
-npm install
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+- Next.js
+- Supabase
+- MongoDB
+- TailwindCSS
+- ShadCN UI
+- Framer Motion
+- Node-fetch + Unfluff
+
+---
+
+## ⚙️ Setup
+
+1. Clone the repo  
+   `git clone https://github.com/areesha5/Nexium_Areesha_Assign2.git`
+
+2. Install dependencies  
+   `npm install`
+
+3. Create a `.env` in root with:
+
+```env
+MONGO_URI=your_mongo_connection_string
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your_supabase_key
