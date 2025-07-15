@@ -45,7 +45,9 @@ export async function POST(req: Request) {
       .from('summaries')
       .insert([{ url, summary, urdu_summary: urdu }]);
 
-    if (supabaseError) throw new Error(`Supabase error: ${supabaseError.message}`);
+    if (supabaseError) {
+      throw new Error(`Supabase error: ${supabaseError.message}`);
+    }
 
     // 👉 Save full blog to MongoDB
     const client = new MongoClient(mongoUri);
@@ -56,8 +58,12 @@ export async function POST(req: Request) {
 
     // ✅ Success response
     return NextResponse.json({ summary, urdu });
-  } catch (err: any) {
-    console.error('[API Error]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.error('[API Error]', err);
+      return NextResponse.json({ error: err.message }, { status: 500 });
+    } else {
+      return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
+    }
   }
 }
