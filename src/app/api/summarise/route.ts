@@ -11,6 +11,11 @@ const mongoUri = process.env.MONGO_URI as string;
 const supabaseUrl = process.env.SUPABASE_URL as string;
 const supabaseKey = process.env.SUPABASE_ANON_KEY as string;
 
+// Ensure all required env vars exist
+if (!mongoUri || !supabaseUrl || !supabaseKey) {
+  throw new Error("Missing required environment variables");
+}
+
 // Supabase client
 const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -45,9 +50,7 @@ export async function POST(req: Request) {
       .from('summaries')
       .insert([{ url, summary, urdu_summary: urdu }]);
 
-    if (supabaseError) {
-      throw new Error(`Supabase error: ${supabaseError.message}`);
-    }
+    if (supabaseError) throw new Error(`Supabase error: ${supabaseError.message}`);
 
     // 👉 Save full blog to MongoDB
     const client = new MongoClient(mongoUri);
@@ -58,12 +61,9 @@ export async function POST(req: Request) {
 
     // ✅ Success response
     return NextResponse.json({ summary, urdu });
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      console.error('[API Error]', err);
-      return NextResponse.json({ error: err.message }, { status: 500 });
-    } else {
-      return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
-    }
+  } catch (err) {
+    const error = err as Error;
+    console.error('[API Error]', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
