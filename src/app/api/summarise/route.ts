@@ -1,66 +1,63 @@
-import { NextResponse } from "next/server";
-import { MongoClient } from "mongodb";
-import { createClient } from "@supabase/supabase-js";
+// src/app/api/summarise/route.ts
+
+import { NextResponse } from 'next/server';
+import { MongoClient } from 'mongodb';
+import { createClient } from '@supabase/supabase-js';
+import fetch from 'node-fetch';
+import unfluff from 'unfluff';
 
 // Load environment variables
-const mongoUri = process.env.MONGO_URI!;
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_ANON_KEY!;
+const mongoUri = process.env.MONGO_URI as string;
+const supabaseUrl = process.env.SUPABASE_URL as string;
+const supabaseKey = process.env.SUPABASE_ANON_KEY as string;
 
 // Supabase client
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-type RequestBody = {
-  url: string;
-};
-
 export async function POST(req: Request) {
   try {
-    const body: RequestBody = await req.json();
-    const { url } = body;
+    const { url } = await req.json();
 
-    if (!url) {
-      return NextResponse.json({ error: "URL is required" }, { status: 400 });
-    }
+    // 👉 Fetch blog content from URL
+    const response = await fetch(url);
+    const html = await response.text();
+    const data = unfluff(html);
+    const fullText = data.text || 'Unable to extract blog content.';
 
-    // Simulated blog full text and summary
-    const fullText = `This is a placeholder for full blog text from URL: ${url}`;
-    const summary =
-      "This blog discusses the importance of clean UI in modern web applications.";
+    // 👉 Generate a basic summary (first 2 sentences)
+    const summary = fullText.split('. ').slice(0, 2).join('. ') + '.';
 
-    // Urdu translation
+    // Urdu translation map
     const urduMap: Record<string, string> = {
-      "clean UI": "صاف یوزر انٹرفیس",
-      "modern web applications": "جدید ویب ایپلیکیشنز",
-      importance: "اہمیت",
+      'clean UI': 'صاف یوزر انٹرفیس',
+      'modern web applications': 'جدید ویب ایپلیکیشنز',
+      importance: 'اہمیت',
     };
 
+    // Translate to Urdu
     let urdu = summary;
     for (const key in urduMap) {
-      urdu = urdu.replace(new RegExp(key, "gi"), urduMap[key]);
+      urdu = urdu.replace(new RegExp(key, 'gi'), urduMap[key]);
     }
 
-    // Save summary in Supabase
+    // 👉 Save summary to Supabase
     const { error: supabaseError } = await supabase
-      .from("summaries")
+      .from('summaries')
       .insert([{ url, summary, urdu_summary: urdu }]);
 
-    if (supabaseError) {
-      throw new Error(`Supabase error: ${supabaseError.message}`);
-    }
+    if (supabaseError) throw new Error(`Supabase error: ${supabaseError.message}`);
 
-    // Save full blog text in MongoDB
+    // 👉 Save full blog to MongoDB
     const client = new MongoClient(mongoUri);
     await client.connect();
-    const db = client.db("blogSummariser");
-    await db.collection("blogs").insertOne({ url, fullText });
+    const db = client.db('blogSummariser');
+    await db.collection('blogs').insertOne({ url, fullText });
     await client.close();
 
+    // ✅ Success response
     return NextResponse.json({ summary, urdu });
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Something went wrong.";
-    console.error("[API ERROR]:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch (err: any) {
+    console.error('[API Error]', err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
