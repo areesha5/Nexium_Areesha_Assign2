@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // src/app/api/summarise/route.ts
 
 import { NextResponse } from 'next/server';
@@ -47,9 +49,9 @@ export async function POST(req: Request) {
 
     // 👉 Save full blog to MongoDB
     const client = new MongoClient(mongoUri, {
-  ssl: true
+  tls: true,
+  retryWrites: true,
 });
-
 
     await client.connect();
     const db = client.db('blogSummariser');
